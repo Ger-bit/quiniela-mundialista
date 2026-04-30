@@ -51,10 +51,9 @@ if st.button("Generar Quiniela") and len(nombres) == num_participantes:
         lista = paises["Pais"].tolist()
         random.shuffle(lista)
 
-        # Distribuir los países del grupo entre los participantes
-        # asegurando que nadie tenga más de un país en el mismo grupo
-        for i, pais in enumerate(lista):
-            participante = nombres[i % num_participantes]
+        # Seleccionar participantes distintos para este grupo
+        seleccionados = random.sample(nombres, k=len(lista))
+        for participante, pais in zip(seleccionados, lista):
             asignaciones[participante].append({"Grupo": grupo, "Pais": pais})
 
     # Construir DataFrame final
@@ -66,7 +65,7 @@ if st.button("Generar Quiniela") and len(nombres) == num_participantes:
 
     # Mostrar resultados sin índice
     st.subheader("Resultados de la Quiniela")
-    st.dataframe(resultado_df.style.hide(axis="index"))
+    st.dataframe(resultado_df, use_container_width=True)
 
     # Exportar a Excel
     buffer = BytesIO()
