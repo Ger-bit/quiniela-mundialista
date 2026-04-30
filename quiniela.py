@@ -1,0 +1,64 @@
+
+import streamlit as st
+import pandas as pd
+import random
+
+# =========================
+# Datos de los países
+# =========================
+data = {
+    "Grupo": ["Grupo A"]*4 + ["Grupo B"]*4 + ["Grupo C"]*4 + ["Grupo D"]*4 +
+             ["Grupo E"]*4 + ["Grupo F"]*4 + ["Grupo G"]*4 + ["Grupo H"]*4 +
+             ["Grupo I"]*4 + ["Grupo J"]*4 + ["Grupo K"]*4 + ["Grupo L"]*4,
+    "Pais": [
+        "México","Sudáfrica","República de Corea","Chequia",
+        "Canadá","Bosnia y Herzegovina","Catar","Suiza",
+        "Brasil","Marruecos","Haití","Escocia",
+        "EE. UU.","Paraguay","Australia","Turquía",
+        "Alemania","Curazao","Costa de Marfil","Ecuador",
+        "Países Bajos","Japón","Suecia","Túnez",
+        "Bélgica","Egipto","RI de Irán","Nueva Zelanda",
+        "España","Islas de Cabo Verde","Arabia Saudí","Uruguay",
+        "Francia","Senegal","Irak","Noruega",
+        "Argentina","Argelia","Austria","Jordania",
+        "Portugal","RD Congo","Uzbekistán","Colombia",
+        "Inglaterra","Croacia","Ghana","Panamá"
+    ]
+}
+df = pd.DataFrame(data)
+
+# =========================
+# Interfaz Streamlit
+# =========================
+st.title("Quiniela Mundial - Asignación de Países")
+
+# Número de participantes
+num_participantes = st.number_input("Número de participantes:", min_value=2, max_value=48, step=1)
+
+# Nombres de los participantes
+nombres = []
+for i in range(num_participantes):
+    nombre = st.text_input(f"Nombre del participante {i+1}:")
+    if nombre:
+        nombres.append(nombre)
+
+# Botón para asignar
+if st.button("Generar Quiniela") and len(nombres) == num_participantes:
+    asignaciones = {p: [] for p in nombres}
+
+    # Iterar por cada grupo
+    for grupo, paises in df.groupby("Grupo"):
+        lista = paises["Pais"].tolist()
+        random.shuffle(lista)
+
+        # Distribuir equitativamente entre los participantes
+        for i, pais in enumerate(lista):
+            participante = nombres[i % num_participantes]
+            asignaciones[participante].append({"Grupo": grupo, "Pais": pais})
+
+    # Mostrar resultados
+    st.subheader("Resultados de la Quiniela")
+    for participante, equipos in asignaciones.items():
+        st.write(f"**{participante}**")
+        resultado = pd.DataFrame(equipos)
+        st.table(resultado)
