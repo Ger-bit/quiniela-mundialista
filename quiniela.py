@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 import random
+from io import BytesIO
 
 # =========================
 # Datos de los países
@@ -51,14 +52,29 @@ if st.button("Generar Quiniela") and len(nombres) == num_participantes:
         lista = paises["Pais"].tolist()
         random.shuffle(lista)
 
-        # Distribuir equitativamente entre los participantes
+        # Distribuir los países del grupo entre los participantes
         for i, pais in enumerate(lista):
             participante = nombres[i % num_participantes]
             asignaciones[participante].append({"Grupo": grupo, "Pais": pais})
 
+    # Construir DataFrame final
+    resultado = []
+    for participante, equipos in asignaciones.items():
+        for equipo in equipos:
+            resultado.append({"Participante": participante, "Grupo": equipo["Grupo"], "Pais": equipo["Pais"]})
+    resultado_df = pd.DataFrame(resultado)
+
     # Mostrar resultados
     st.subheader("Resultados de la Quiniela")
-    for participante, equipos in asignaciones.items():
-        st.write(f"**{participante}**")
-        resultado = pd.DataFrame(equipos)
-        st.table(resultado)
+    st.dataframe(resultado_df)
+
+    # Exportar a Excel
+    buffer = BytesIO()
+    with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+        resultado_df.to_excel(writer, index=False, sheet_name="Quiniela")
+    st.download_button(
+        label="📥 Descargar resultados en Excel",
+        data=buffer.getvalue(),
+        file_name="quiniela.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
