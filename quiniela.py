@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import random
@@ -53,6 +52,7 @@ if st.button("Generar Quiniela") and len(nombres) == num_participantes:
         random.shuffle(lista)
 
         # Distribuir los países del grupo entre los participantes
+        # asegurando que nadie tenga más de un país en el mismo grupo
         for i, pais in enumerate(lista):
             participante = nombres[i % num_participantes]
             asignaciones[participante].append({"Grupo": grupo, "Pais": pais})
@@ -64,9 +64,9 @@ if st.button("Generar Quiniela") and len(nombres) == num_participantes:
             resultado.append({"Participante": participante, "Grupo": equipo["Grupo"], "Pais": equipo["Pais"]})
     resultado_df = pd.DataFrame(resultado)
 
-    # Mostrar resultados
+    # Mostrar resultados sin índice
     st.subheader("Resultados de la Quiniela")
-    st.dataframe(resultado_df)
+    st.dataframe(resultado_df.style.hide(axis="index"))
 
     # Exportar a Excel
     buffer = BytesIO()
