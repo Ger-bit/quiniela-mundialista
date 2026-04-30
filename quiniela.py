@@ -30,7 +30,7 @@ df = pd.DataFrame(data)
 # =========================
 # Interfaz Streamlit
 # =========================
-st.title("Quiniela Mundial - Asignación de Países")
+st.title("Quiniela Mundial - Asignación Equitativa de Países")
 
 # Número de participantes
 num_participantes = st.number_input("Número de participantes:", min_value=2, max_value=48, step=1)
@@ -46,15 +46,13 @@ for i in range(num_participantes):
 if st.button("Generar Quiniela") and len(nombres) == num_participantes:
     asignaciones = {p: [] for p in nombres}
 
-    # Iterar por cada grupo
-    for grupo, paises in df.groupby("Grupo"):
-        lista = paises["Pais"].tolist()
-        random.shuffle(lista)
+    # Mezclar todos los países
+    paises = df.sample(frac=1).reset_index(drop=True)
 
-        # Seleccionar participantes distintos para este grupo
-        seleccionados = random.sample(nombres, k=len(lista))
-        for participante, pais in zip(seleccionados, lista):
-            asignaciones[participante].append({"Grupo": grupo, "Pais": pais})
+    # Asignar en orden circular (round-robin)
+    for i, row in paises.iterrows():
+        participante = nombres[i % num_participantes]
+        asignaciones[participante].append({"Grupo": row["Grupo"], "Pais": row["Pais"]})
 
     # Construir DataFrame final
     resultado = []
